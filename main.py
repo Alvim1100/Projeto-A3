@@ -26,8 +26,8 @@ def cadastradoc():
             linha = input("Digite o conteúdo do documento: ")
             arquivo.write(linha + "\n")
     # Adiciona o documento à lista
-    chave = input("Digite uma palavra-chave para o documento: ")
-    lista.inserir(nome_doc,linha, chave)
+    chave = f"doc{len(lista) + 1}"
+    lista.inserir(nome_doc, linha, chave)
     # Exibe mensagem de sucesso
     print(f"Documento '{nome_doc}' cadastrado com a chave '{chave}'.")
     print(f"Arquivo '{nome_doc}' criado com sucesso!")
