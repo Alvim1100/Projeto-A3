@@ -1,5 +1,6 @@
 from lista import *
 from ordenation import *
+from testes import *
 
 lista = Lista()
 def criamenu():
@@ -53,6 +54,29 @@ def menu():
             input("Pressione Enter para continuar...")
         if i == 2:
             listadoc()
-            
+
+        if i == 4:
+            print("Estatísticas e ordenações:")
+
+            j = int(input("Testar algoritimos de ordenação? (1 - Sim, 0 - Não): "))
+
+            if j == 1:
+
+                p = int(input("Teste aleatório? (1 - Sim, 0 - Não): "))
+
+                if p == 1:
+                    print("Gerando lista aleatória...")
+                    test_algorithms(random_test=True)
+                else:
+                    print("Digite os números separados por vírgula:")
+                    k = input("Adicione elementos aleatórios separados por virgula a serem ordenados:  ")
+                    print("Lista original:", k)
+
+                    k = list(map(int, k.split(',')))
+                    test_algorithms(random_test=False, arr=k)
+
+        if i == 0:
+            print("Saindo do sistema...")
+            break
 
 menu()
