@@ -2,6 +2,7 @@ from lista import *
 from ordenation import *
 from testes import *
 from btree import BTree
+from huffman import huffman_compress, huffman_decompress  # Importa funções de Huffman
 import pickle
 
 import os
@@ -55,13 +56,16 @@ def cadastradoc():
     # Adiciona a extensão .txt automaticamente
     nome_doc = nome_base + ".txt"
     
-    # Abre o arquivo para escrita e salva o conteúdo digitado
-    with open(nome_doc, "w", encoding="utf-8") as arquivo:
-            linha = input("Digite o conteúdo do documento: ")
-            arquivo.write(linha + "\n")
+    # Recebe o conteúdo do documento
+    linha = input("Digite o conteúdo do documento: ")
+    # Comprime o conteúdo com Huffman
+    compressed = huffman_compress(linha)
+    # Salva o conteúdo comprimido em binário
+    with open(nome_doc, "wb") as arquivo:
+        arquivo.write(compressed)
     # Gera uma chave única para o documento
     chave = f"doc{len(lista) + 1}"
-    # Insere o documento na lista
+    # Insere o documento na lista (guarda o texto original para listagem)
     lista.inserir(nome_doc, linha, chave)
     # Indexa o documento na BTree usando a chave
     btree.insert(chave, nome_doc)
@@ -89,9 +93,10 @@ def buscarchave():
     nome_doc = btree.search(chave)
     if nome_doc:
         print(f"Documento encontrado: {nome_doc}")
-        # Abre e exibe o conteúdo do documento encontrado
-        with open(nome_doc, "r", encoding="utf-8") as arquivo:
-            conteudo = arquivo.read()
+        # Lê o conteúdo comprimido e descomprime
+        with open(nome_doc, "rb") as arquivo:
+            compressed = arquivo.read()
+            conteudo = huffman_decompress(compressed)
             print("Conteúdo:", conteudo)
     else:
         print("Documento não encontrado.")
@@ -103,10 +108,10 @@ def menu():
         i = int(input("Escolha uma opção:"))
         if i == 1:
             cadastradoc()
-            print(len(lista))
             input("Pressione Enter para continuar...")
         if i == 2:
             listadoc()
+            input("Pressione Enter para continuar...")
         if i == 3:
             buscarchave()
             input("Pressione Enter para continuar...")
