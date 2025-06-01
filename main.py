@@ -1,4 +1,6 @@
 from lista import *
+from ordenation import *
+
 lista = Lista()
 def criamenu():
     print(''' 
