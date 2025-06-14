@@ -1,13 +1,14 @@
 from lista import *
 from ordenation import *
 from testes import *
+from avl import AVLTree
 from btree import BTree
-from huffman import huffman_compress, huffman_decompress  # Importa funções de Huffman
+from huffman import huffman_compress, huffman_decompress
 import pickle
-
 import os
 
 lista = Lista()
+avl_index_file = "avl_index.pkl"
 btree_index_file = "btree_index.pkl"
 lista_file = "lista.pkl"
 
@@ -27,6 +28,13 @@ def carregar_lista():
 
 # Carrega a lista ao iniciar o programa
 carregar_lista()
+
+# Carrega a AVLTree do disco se existir, senão cria uma nova
+if os.path.exists(avl_index_file):
+    avl = AVLTree()
+    avl.load(avl_index_file)
+else:
+    avl = AVLTree()
 
 # Carrega a BTree do disco se existir, senão cria uma nova
 if os.path.exists(btree_index_file):
@@ -67,9 +75,11 @@ def cadastradoc():
     chave = f"doc{len(lista) + 1}"
     # Insere o documento na lista (guarda o texto original para listagem)
     lista.inserir(nome_doc, linha, chave)
-    # Indexa o documento na BTree usando a chave
+    # Indexa o documento na AVL e na BTree
+    avl.insert(chave)
     btree.insert(chave, nome_doc)
-    # Salva a BTree em disco
+    # Salva as árvores em disco
+    avl.save(avl_index_file)
     btree.save(btree_index_file)
     # Salva a lista após cadastrar o documento
     salvar_lista()
@@ -88,13 +98,14 @@ def listadoc():
         print(f"Total de documentos cadastrados: {len(lista)}")
 
 def buscarchave():
-    # Busca um documento pela chave usando a BTree
+    # Busca um documento pela chave usando a AVL e a BTree
     chave = input("Digite a chave do documento para buscar: ")
-    nome_doc = btree.search(chave)
-    if nome_doc:
-        print(f"Documento encontrado: {nome_doc}")
+    resultado_avl = avl.search(chave)
+    resultado_btree = btree.search(chave)
+    if resultado_avl and resultado_btree:
+        print(f"Documento encontrado: {resultado_btree}")
         # Lê o conteúdo comprimido e descomprime
-        with open(nome_doc, "rb") as arquivo:
+        with open(resultado_btree, "rb") as arquivo:
             compressed = arquivo.read()
             conteudo = huffman_decompress(compressed)
             print("Conteúdo:", conteudo)
