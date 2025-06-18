@@ -6,12 +6,29 @@ from btree import BTree
 from huffman import huffman_compress, huffman_decompress
 import pickle
 import os
+from collections import defaultdict
 
 lista = Lista()
 avl_index_file = "avl_index.pkl"
 btree_index_file = "btree_index.pkl"
 lista_file = "lista.pkl"
 
+
+# Índice invertido global
+indice_invertido = defaultdict(list)
+
+# Função auxiliar: salvar índice invertido
+def salvar_indice_invertido():
+    with open(inverted_index_file, "wb") as f:
+        pickle.dump(dict(indice_invertido), f)
+
+# Função auxiliar: carregar índice invertido
+def carregar_indice_invertido():
+    global indice_invertido
+    if os.path.exists(inverted_index_file):
+        with open(inverted_index_file, "rb") as f:
+            indice_invertido = defaultdict(list, pickle.load(f))
+            
 def salvar_lista():
     # Salva a lista de documentos no arquivo lista.pkl
     with open(lista_file, "wb") as f:
@@ -41,6 +58,27 @@ if os.path.exists(btree_index_file):
     btree = BTree.load(btree_index_file)
 else:
     btree = BTree()
+
+# Função para indexar palavras no índice invertido
+def indexar_palavras(chave, conteudo):
+    palavras = conteudo.lower().split()
+    for palavra in palavras:
+        if chave not in indice_invertido[palavra]:
+            indice_invertido[palavra].append(chave)
+    salvar_indice_invertido()
+
+# Função para contar frequência de uma palavra
+def contar_frequencia(palavra, texto):
+    return texto.lower().split().count(palavra.lower())
+
+# Função para ordenar resultados por frequência usando heap sort
+def ordenar_por_frequencia(palavra, documentos):
+    frequencias = []
+    for nome_doc, linha, chave in lista:
+        if chave in documentos:
+            freq = contar_frequencia(palavra, linha)
+            frequencias.append((freq, chave, nome_doc))
+    return OrderAlgos.heap_sort(frequencias)[::-1]
 
 def criamenu():
     # Exibe o menu principal do sistema
@@ -98,19 +136,21 @@ def listadoc():
         print(f"Total de documentos cadastrados: {len(lista)}")
 
 def buscarchave():
-    # Busca um documento pela chave usando a AVL e a BTree
-    chave = input("Digite a chave do documento para buscar: ")
-    resultado_avl = avl.search(chave)
-    resultado_btree = btree.search(chave)
-    if resultado_avl and resultado_btree:
-        print(f"Documento encontrado: {resultado_btree}")
-        # Lê o conteúdo comprimido e descomprime
-        with open(resultado_btree, "rb") as arquivo:
+    palavra = input("Digite a palavra-chave para buscar: ").lower()
+    if palavra not in indice_invertido:
+        print("Palavra não encontrada.")
+        return
+
+    documentos = indice_invertido[palavra]
+    resultados = ordenar_por_frequencia(palavra, documentos)
+
+    for freq, chave, nome_doc in resultados:
+        print(f"Documento: {nome_doc} | Chave: {chave} | Frequência: {freq}")
+        with open(nome_doc, "rb") as arquivo:
             compressed = arquivo.read()
             conteudo = huffman_decompress(compressed)
             print("Conteúdo:", conteudo)
-    else:
-        print("Documento não encontrado.")
+            print()
     
 def menu():
     # Loop principal do menu do sistema
@@ -151,3 +191,4 @@ def menu():
             break
 
 menu()
+
