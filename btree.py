@@ -1,7 +1,7 @@
 import pickle
 
 # Classe que representa um nó da B-Tree
-class BTreeNode:
+class BTreeNode: 
     def __init__(self, leaf=False):
         self.leaf = leaf      # Indica se o nó é folha (True) ou interno (False)
         self.keys = []        # Lista de pares (chave, valor) armazenados no nó

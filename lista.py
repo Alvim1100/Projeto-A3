@@ -1,5 +1,5 @@
 class Lista:
-    # Classe interna que representa um nó da lista
+    # Classe interna que representa um nó da lista 
     class No:
         def __init__(self, valor, proximo=None):
             self.valor = valor  # Valor armazenado no nó
