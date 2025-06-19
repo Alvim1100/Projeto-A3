@@ -137,20 +137,28 @@ def listadoc():
 
 def buscarchave():
     palavra = input("Digite a palavra-chave para buscar: ").lower()
+
     if palavra not in indice_invertido:
-        print("Palavra não encontrada.")
+        print("Nenhum documento contém essa palavra.")
         return
 
     documentos = indice_invertido[palavra]
     resultados = ordenar_por_frequencia(palavra, documentos)
 
+    print(f"\nResultados para a palavra '{palavra}':")
     for freq, chave, nome_doc in resultados:
-        print(f"Documento: {nome_doc} | Chave: {chave} | Frequência: {freq}")
-        with open(nome_doc, "rb") as arquivo:
-            compressed = arquivo.read()
-            conteudo = huffman_decompress(compressed)
-            print("Conteúdo:", conteudo)
-            print()
+        print(f"- Documento: {nome_doc} | Chave: {chave} | Ocorrências: {freq}")
+
+        # Exibe conteúdo descomprimido
+        try:
+            with open(nome_doc, "rb") as f:
+                conteudo = huffman_decompress(f.read())
+                print("  Trecho:", conteudo[:100], "...")  # mostra só os primeiros 100 caracteres
+        except Exception as e:
+            print("  Erro ao ler o documento:", e)
+
+    print()
+
     
 def menu():
     # Loop principal do menu do sistema
